@@ -1,0 +1,94 @@
+{
+  "Card": [
+    {
+      "Option": "Option1",
+      "related options": ["Option5", "Option6"],
+      "content": "Payment Status",
+      "isParent": true
+    },
+    {
+      "Option": "Option2",
+      "related options": ["Option7"],
+      "content": "Payment History",
+      "isParent": true
+    },
+    {
+      "Option": "Option3",
+      "related options": ["Option14"],
+      "content": "Password Help",
+      "isParent": true
+    },
+    {
+      "Option": "Option4",
+      "related options": ["Option15"],
+      "content": "Others",
+      "isParent": true
+    },
+    {
+      "Option": "Option5",
+      "related options": [],
+      "content": "Please provide the Company ID to get Payment status",
+      "isParent": false
+    },
+    {
+      "Option": "Option6",
+      "related options": [],
+      "content": "Please provide the Transaction ID to get Payment status",
+      "isParent": false
+    },
+    {
+      "Option": "Option7",
+      "related options": ["Option8", "Option9"],
+      "content": "Please provide the Company ID to get payment History",
+      "isParent": false
+    },
+    {
+      "Option": "Option8",
+      "related options": ["Option10"],
+      "content": "Please select the date range (Start Date - End Date)",
+      "isParent": false
+    },
+    {
+      "Option": "Option9",
+      "related options": ["Option11", "Option12", "Option13"],
+      "content": "Select the period to get payment history for 1 month, 3 months or 6 months:",
+      "isParent": false
+    },
+    {
+      "Option": "Option10",
+      "related options": [],
+      "content": "Date Picker",
+      "isParent": false
+    },
+    {
+      "Option": "Option11",
+      "related options": [],
+      "content": "Latest month",
+      "isParent": false
+    },
+    {
+      "Option": "Option12",
+      "related options": [],
+      "content": "Last 3 months",
+      "isParent": false
+    },
+    {
+      "Option": "Option13",
+      "related options": [],
+      "content": "Last 6 months",
+      "isParent": false
+    },
+    {
+      "Option": "Option14",
+      "related options": [],
+      "content": "Please refer to the given link for password reset - <Link>",
+      "isParent": false
+    },
+    {
+      "Option": "Option15",
+      "related options": [],
+      "content": "Sorry! I am not able to help you with anything else right now. Instead, please call our support number at XXXXXXXXXX",
+      "isParent": false
+    }
+  ]
+}
