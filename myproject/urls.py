@@ -18,6 +18,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
 
+admin.site.site_header = "Chatbot Admin"
+admin.site.site_title = "Chatbot Admin Portal"
+admin.site.index_title = "Welcome to Chatbot"
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),

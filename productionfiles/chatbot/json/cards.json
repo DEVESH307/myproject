@@ -1,0 +1,108 @@
+{
+  "Card": [
+    {
+      "id": 0,
+      "user": "Hi",
+      "related_options": [1, 2, 3, 4],
+      "chatbot": "Hello! How can I assist you today?",
+      "isParent": false,
+      "wait_for_user_input": false
+    },
+    {
+      "id": 1,
+      "user": "Payment Status",
+      "related_options": [5, 6],
+      "chatbot": "Please choose the Company ID or Transaction ID to get the Payment Status.",
+      "isParent": true,
+      "wait_for_user_input": false
+    },
+    {
+      "id": 2,
+      "user": "Payment History",
+      "related_options": [7],
+      "chatbot": "Please choose the Company ID to get the Payment History.",
+      "isParent": true,
+      "wait_for_user_input": false
+    },
+    {
+      "id": 3,
+      "user": "Password Help",
+      "related_options": [],
+      "chatbot": "Please refer to the given link for password reset: <Link>",
+      "isParent": true,
+      "wait_for_user_input": false
+    },
+    {
+      "id": 4,
+      "user": "Others",
+      "related_options": [],
+      "chatbot": "Sorry! I am not able to help you with anything else right now. Instead, please call our support number at XXXXXXXXXX.",
+      "isParent": true,
+      "wait_for_user_input": false
+    },
+    {
+      "id": 5,
+      "user": "Company ID for Payment Status",
+      "related_options": [],
+      "chatbot": "Please enter the Company ID for the Payment Status of the past month.",
+      "isParent": false,
+      "wait_for_user_input": true
+    },
+    {
+      "id": 6,
+      "user": "Transaction ID for Payment Status",
+      "related_options": [],
+      "chatbot": "Please enter the Transaction ID for the Payment Status of the past month.",
+      "isParent": false,
+      "wait_for_user_input": true
+    },
+    {
+      "id": 7,
+      "user": "Company ID for Payment History",
+      "related_options": [8, 9],
+      "chatbot": "Please choose a Date Picker or Time Period for the Payment History.",
+      "isParent": false,
+      "wait_for_user_input": true
+    },
+    {
+      "id": 8,
+      "user": "Date Picker (Start Date - End Date)",
+      "related_options": [],
+      "chatbot": "Please provide a date range (Start Date (YYYY-MM-DD) - End Date (YYYY-MM-DD)) from the last six months.",
+      "isParent": false,
+      "wait_for_user_input": true
+    },
+    {
+      "id": 9,
+      "user": "Time Period (1 month, 3 months, 6 months)",
+      "related_options": [10, 11, 12],
+      "chatbot": "Please choose a Time Period (1 month, 3 months, 6 months) for the Payment History.",
+      "isParent": false,
+      "wait_for_user_input": false
+    },
+    {
+      "id": 10,
+      "user": "1 month",
+      "related_options": [],
+      "chatbot": "Please allow me a moment; I am in the process of fetching your Payment History for the past month.",
+      "isParent": false,
+      "wait_for_user_input": false
+    },
+    {
+      "id": 11,
+      "user": "3 months",
+      "related_options": [],
+      "chatbot": "Please allow me a moment; I am in the process of fetching your Payment History for the past 3 months.",
+      "isParent": false,
+      "wait_for_user_input": false
+    },
+    {
+      "id": 12,
+      "user": "6 months",
+      "related_options": [],
+      "chatbot": "Please allow me a moment; I am in the process of fetching your Payment History for the past 6 months.",
+      "isParent": false,
+      "wait_for_user_input": false
+    }
+  ]
+}

@@ -3,9 +3,15 @@ import json
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
+from django.templatetags.static import static
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import random
+import pandas as pd
+
+
+dataframe = pd.read_csv(r"C:\Users\HP\Desktop\chatbot_backend\myproject\data.csv")
+# print(dataframe)
 
 # Global flag to control the chatbot behavior
 rule_based_triggered = False
@@ -275,11 +281,20 @@ class GetBotReplyAPIView(APIView):
                 payment_status_info, payment_status_response = paymentStatus(user_input, current_card_id)
                 
                 if payment_status_response.get('is_valid_company') or payment_status_response.get('is_valid_transaction'):
+                    table_html = dataframe.to_html(classes=['table', 'table-bordered', 'table-striped', 'table-responsive'], index=False)
+                    # Create a bot message
+                    bot_message = "Please allow me a moment; I am in the process of fetching your Payment Status for the past month."
+                    # The URL path to your CSS file
+                    custom_css_path = '/static/chatbot/css/style.css'  
+                    # Combine the bot message, custom CSS (loaded from the CSS file), and the table HTML
+                    bot_reply = f'<div class="bot-message">{bot_message}</div><link rel="stylesheet" type="text/css" href="{custom_css_path}"><div class="table-responsive">{table_html}</div>'
+
                     return JsonResponse({
-                        'bot_reply': "Please allow me a moment; I am in the process of fetching your Payment Status for the past month.",
+                        'bot_reply': bot_reply,
                         'payment_status_response': payment_status_response,
                         'payment_status_info': payment_status_info
-                    }, json_dumps_params={'indent': 4})
+                        }, json_dumps_params={'indent': 4})
+
                 else:
                     return JsonResponse({
                         'bot_reply': payment_status_response['bot_reply'],

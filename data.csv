@@ -1,0 +1,7 @@
+Customer ID,Transaction ID,Amount,Date,Description
+101,TRX001,100.00,2023-09-01,Deposit
+102,TRX002,50.00,2023-09-02,Withdrawal
+103,TRX003,200.00,2023-09-03,Deposit
+101,TRX004,30.00,2023-09-04,Withdrawal
+104,TRX005,150.00,2023-09-05,Deposit
+102,TRX006,25.00,2023-09-06,Withdrawal

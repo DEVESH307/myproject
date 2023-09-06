@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,11 @@ SECRET_KEY = 'django-insecure-b(3*f0t7x$1*c0-9s1eti0&-2byiftjbug@ewn8rc3y^7v0@40
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'chatbot.com',
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -37,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+    # 'chatbot.apps.ChatbotConfig',
+
     # new add here
     'chatbot',
     'rest_framework',
@@ -71,7 +77,7 @@ ROOT_URLCONF = 'myproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, "chatbot\\templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -138,7 +144,9 @@ STATIC_URL = 'static/'
 
 #Add this in your settings.py file:
 STATICFILES_DIRS = [
-    BASE_DIR / 'mystaticfiles'
+    os.path.join(BASE_DIR, 'chatbot', 'static'),
+    # os.path.join(BASE_DIR, 'static'),
+    # BASE_DIR/'chatbot/static'
 ]
 
 # Default primary key field type
