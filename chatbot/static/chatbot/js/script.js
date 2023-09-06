@@ -15,9 +15,43 @@ document.addEventListener("DOMContentLoaded", function () {
   let disabledCards = [];
   loader.hidden = true;
   let clickedCardMessage = '';
+  let isProcessingPostRequest = false;
 
 
   // Utility functions
+
+  // Function to asynchronously load cards data from a JSON file
+  async function loadCardsData() {
+    const cardsJsonPath = '/static/chatbot/json/cards.json'; // Path to the JSON file
+    try {
+      const response = await fetch(cardsJsonPath);
+      if (!response.ok) {
+        throw new Error('Failed to load cards data.');
+      }
+      const cardsData = await response.json();
+      return cardsData;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  // Function to find the card ID based on user message
+  async function findCardIdByclickedCardMessage(clickedCardMessage) {
+    if(clickedCardMessage === ""){
+      return -1
+    }
+    const cardsData = await loadCardsData();
+    if (cardsData) {
+      const matchingCard = cardsData.Card.find(card => card.user.toLowerCase() === clickedCardMessage.toLowerCase());
+      if (matchingCard) {
+        return matchingCard.id;
+      } else {
+        throw new Error(`Card not found for user message: "${clickedCardMessage}"`);
+      }
+    }
+    return null;
+  }
 
   // Function to create a DOM element with given class names
   function createDOMElement(elementType, classNames = []) {
@@ -324,14 +358,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Function to generate bot reply for POST request
-  async function generateBotReplyPost(userInput) {
+  async function generateBotReplyPost(userInput, userInputType) {
     try {
       const response = await fetch('/chatbot/bot-reply/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded', // Modify the content type if needed
         },
-        body: `user_input=${encodeURIComponent(userInput)}`,
+        body: `user_input=${encodeURIComponent(userInput)}&user_input_type=${userInputType}`,
       });
   
       if (!response.ok) {
@@ -347,63 +381,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Function to send a message
-  // async function sendMessage() {
-  //   if (isMessageBeingSent) return;
-
-  //   isMessageBeingSent = true;
-  //   userInput.removeEventListener("keypress", handleKeyPress);
-  //   sendBtn.disabled = true;
-  //   const message = userInput.value.trim();
-
-  //   // Reset the clickedCardMessage when sending a new text message
-  //   if (message !== '') {
-  //     clickedCardMessage = '';
-  //   }
-
-  //   // Check if there is an active card (clickedCardMessage has priority)
-  //   const userMessage = clickedCardMessage || message;
-
-  //   if (userMessage) {
-  //     // addMessage(userMessage, true);
-  //     if (clickedCardMessage === '') {
-  //       addMessage(userMessage, true);
-  //     }
-  //     userInput.value = '';
-  //     userInput.style.height = originalHeight;
-  //     showLoader();
-  //     scrollToBottom();
-
-  //     const botReplyData = await generateBotReplyGet(userMessage);
-  //     const botReply = botReplyData.bot_reply;
-  //     if (botReplyData.parent_data) {
-  //       addMessage(botReply, false);
-  //       showCardOptions(botReplyData); // Pass the userMessage as input to showCardOptions
-  //     } else if (botReplyData.related_cards) {
-  //       showCardOptions(botReplyData);
-  //     } else {
-  //       addMessage(botReply, false);
-  //     }
-
-  //     hideLoader();
-  //     scrollToBottom();
-  //   } else {
-  //     userInput.placeholder = placeholder;
-  //     // Handle the case when there is no user input or clickedCardMessage
-  //     // For example, you can show an error message or handle it in a specific way
-  //   }
-
-  //   sendBtn.disabled =
-  //     userInput.value.trim() === '' ||
-  //     isMessageBeingSent ||
-  //     chatLog.getElementsByClassName('active-card').length > 0 ||
-  //     loader.hidden === false;
-  //   userInput.addEventListener('keypress', handleKeyPress);
-  //   isMessageBeingSent = false;
-  // }
-
-  // Function to send a message
   async function sendMessage() {
-    if (isMessageBeingSent) return;
+    if (isMessageBeingSent) return;  
 
     isMessageBeingSent = true;
     userInput.removeEventListener("keypress", handleKeyPress);
@@ -417,6 +396,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Check if there is an active card (clickedCardMessage has priority)
     const userMessage = clickedCardMessage || message;
+    const userInputType = clickedCardMessage !== "" ? 'clickedCardMessage' : 'userMessage';
+    // Simulate user input to find the card ID based on the user message
+    const currentCardId = await findCardIdByclickedCardMessage(clickedCardMessage);
 
     if (userMessage) {
       // addMessage(userMessage, true);
@@ -429,10 +411,27 @@ document.addEventListener("DOMContentLoaded", function () {
       scrollToBottom();
 
 
-      if (userMessage === "Company ID for Payment Status" || userMessage === "Transaction ID for Payment Status") {
-        const botReplyData = await generateBotReplyPost(userMessage);
+      // if (userMessage === "Company ID for Payment Status" || userMessage === "Transaction ID for Payment Status") {
+      if (userInputType === "clickedCardMessage" && currentCardId >= 5) {
+        isProcessingPostRequest = true
+        const botReplyData = await generateBotReplyPost(userMessage, userInputType);
+        // console.log(botReplyData)
         const botReply = botReplyData.bot_reply;
+        // addMessage(botReply, false);
+      }
+      
+      //Run Only Post Request if isProcessingPostRequest == true else Get Request only
+      if (isProcessingPostRequest) {
+        // console.log(isProcessingPostRequest)
+        const botReplyData = await generateBotReplyPost(userMessage, userInputType);
+        const botReply = botReplyData.bot_reply; 
+        if (botReplyData.payment_status_response){
+          if (botReplyData.payment_status_response['is_valid_company'] || botReplyData.payment_status_response['is_valid_transaction']) {
+            isProcessingPostRequest = false;
+          }
+        }
         addMessage(botReply, false);
+        
       } else {
         const botReplyData = await generateBotReplyGet(userMessage);
         const botReply = botReplyData.bot_reply;
@@ -446,17 +445,6 @@ document.addEventListener("DOMContentLoaded", function () {
           addMessage(botReply, false);
         }
       }
-
-      // const botReply = botReplyData.bot_reply;
-      // if (botReplyData.parent_data) {
-      //   addMessage(botReply, false);
-      //   showCardOptions(botReplyData); // Pass the userMessage as input to showCardOptions
-      // } else if (botReplyData.related_cards) {
-      //   showCardOptions(botReplyData);
-      // } else {
-      //   addMessage(botReply, false);
-      // }
-
       hideLoader();
       scrollToBottom();
     } else {
@@ -464,7 +452,6 @@ document.addEventListener("DOMContentLoaded", function () {
       // Handle the case when there is no user input or clickedCardMessage
       // For example, you can show an error message or handle it in a specific way
     }
-
     sendBtn.disabled =
       userInput.value.trim() === '' ||
       isMessageBeingSent ||
