@@ -8,10 +8,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 import random
 import pandas as pd
-from pandasql import sqldf
 
-csv_data_path = os.path.join(os.path.dirname(__file__), 'static/chatbot/data/data.csv')
-dataframe = pd.read_csv(csv_data_path)
+
+dataframe = pd.read_csv(r"C:\Users\HP\Desktop\chatbot_backend\myproject\data.csv")
 # print(dataframe)
 
 # Global flag to control the chatbot behavior
@@ -146,25 +145,6 @@ def paymentStatus(user_input, current_card_id):
     
     # Return payment status info and response data
     return payment_status_info, response_data
-
-#payment status function
-def get_payment_status(payment_status_info):
-    try:
-        company_id = payment_status_info.get('Company ID')
-        transaction_id = payment_status_info.get('Transaction ID')
-        query = "SELECT * FROM dataframe WHERE "
-        if company_id:
-            query += f"client_id = '{company_id}'"
-        elif transaction_id:
-            query += f"trn_number = '{transaction_id}'"
-        else:
-            return "Invalid Company ID or Transaction ID has been provided."
-        query += " ORDER BY trn_date DESC LIMIT 10"
-        result = sqldf(query)
-        return result
-    except Exception as e:
-        return f"An error occurred: {str(e)}"
-
 
 # Check and update payment History information
 def paymentHistory():
@@ -301,32 +281,24 @@ class GetBotReplyAPIView(APIView):
                 payment_status_info, payment_status_response = paymentStatus(user_input, current_card_id)
                 
                 if payment_status_response.get('is_valid_company') or payment_status_response.get('is_valid_transaction'):
-                    payment_status_dataframe = get_payment_status(payment_status_info)
-                    # Check if the result is a DataFrame or an error message
-                    print(payment_status_dataframe)
-                    print(isinstance(payment_status_dataframe, pd.DataFrame))
-                    if isinstance(payment_status_dataframe, pd.DataFrame):
-                        if not payment_status_dataframe.empty:
-                            table_html = payment_status_dataframe.to_html(classes=['table', 'table-bordered', 'table-striped', 'table-responsive'], index=False)
-                            # Create a bot message
-                            bot_message = "Please allow me a moment; I am in the process of fetching your Payment Status for the past month."
-                            # The URL path to your CSS file
-                            custom_css_path = '/static/chatbot/css/style.css'  
-                            # Combine the bot message, custom CSS (loaded from the CSS file), and the table HTML
-                            bot_reply = f'<div class="bot-message">{bot_message}</div><link rel="stylesheet" type="text/css" href="{custom_css_path}"><div class="table-responsive">{table_html}</div>'
+                    table_html = dataframe.to_html(classes=['table', 'table-bordered', 'table-striped', 'table-responsive'], index=False)
+                    # Create a bot message
+                    bot_message = "Please allow me a moment; I am in the process of fetching your Payment Status for the past month."
+                    # The URL path to your CSS file
+                    custom_css_path = '/static/chatbot/css/style.css'  
+                    # Combine the bot message, custom CSS (loaded from the CSS file), and the table HTML
+                    bot_reply = (
+                        f'<div class="bot-message">{bot_message}</div>'
+                        f'<link rel="stylesheet" type="text/css" href="{custom_css_path}">'
+                        f'<div class="table-responsive">{table_html}</div>'
+                    )
 
-                            return JsonResponse({
-                                'bot_reply': bot_reply,
-                                'payment_status_response': payment_status_response,
-                                'payment_status_info': payment_status_info
-                                }, json_dumps_params={'indent': 4})
-                        else:
-                            return JsonResponse({
-                                'bot_reply': 'You have entered invalid Company ID or Transaction ID'
-                                }, json_dumps_params={'indent': 4})
+                    return JsonResponse({
+                        'bot_reply': bot_reply,
+                        'payment_status_response': payment_status_response,
+                        'payment_status_info': payment_status_info
+                        }, json_dumps_params={'indent': 4})
 
-                    else:
-                        return JsonResponse({'bot_reply': {'status': 'error', 'message': payment_status_dataframe}}, status=400)
                 else:
                     return JsonResponse({
                         'bot_reply': payment_status_response['bot_reply'],
