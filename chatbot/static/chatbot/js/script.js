@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded", function () {
   loader.hidden = true;
   let clickedCardMessage = '';
   let isProcessingPostRequest = false;
+  let submitDateButtonClicked = false;
+
 
 
   // Utility functions
@@ -151,6 +153,120 @@ document.addEventListener("DOMContentLoaded", function () {
       event.preventDefault();
       sendMessage();
     }
+  }
+
+  // Function to add a bot message with a date range picker
+  function addDateRangePicker() {
+    // let submitDateButtonClicked = false;
+    const messageElement = createDOMElement("div", ["message", "bot-message"]);
+
+    const avatarElement = createDOMElement("div", ["avatar", "bot-avatar"]);
+    messageElement.appendChild(avatarElement);
+
+    const textElement = createDOMElement("div", ["text-wrapper"]);
+    textElement.innerHTML = `
+      <label for="start-date-picker">Start Date:</label>
+      <input type="text" id="start-date-picker" class="date-picker" placeholder="Start Date" />
+      <label for="end-date-picker">End Date:</label>
+      <input type="text" id="end-date-picker" class="date-picker" placeholder="End Date" />
+      <button id="submit-date-range" class="btn btn-danger btn-sm my-2" disabled>Submit</button>
+    `;
+    messageElement.appendChild(textElement);
+
+    const timestampElement = createDOMElement("div", ["timestamp", "bot-timestamp"]);
+    const timestamp = formatTimestamp(new Date()); // Format the timestamp
+    timestampElement.innerText = timestamp; // Set the timestamp text
+    messageElement.appendChild(timestampElement); // Append the timestamp element
+
+    chatLog.appendChild(messageElement);
+
+    // Get the date picker input elements and the submit button
+    const startDatePicker = document.getElementById("start-date-picker");
+    const endDatePicker = document.getElementById("end-date-picker");
+    const submitButton = document.getElementById("submit-date-range");
+
+    // Function to open the date picker when the input field is clicked
+    function openDatePicker(inputField) {
+      inputField.addEventListener("click", function () {
+        inputField.blur(); // Remove focus to prevent keyboard input
+        inputField.type = "date"; // Change input type to date
+        inputField.click(); // Trigger the date picker
+      });
+    }
+
+    // Call the function to open the date picker for both input fields
+    openDatePicker(startDatePicker);
+    openDatePicker(endDatePicker);
+
+    // Calculate the minimum date allowed (six months ago from today)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const minDate = sixMonthsAgo.toISOString().split("T")[0];
+
+    // Set the minimum date for both date pickers
+    startDatePicker.min = minDate;
+    endDatePicker.min = minDate;
+
+    // Set the current date as the maximum date for both date pickers
+    const today = new Date().toISOString().split("T")[0];
+    startDatePicker.max = today;
+    endDatePicker.max = today;
+
+    // Event listener for start date picker
+    startDatePicker.addEventListener("input", function () {
+      // Ensure start date is less than or equal to end date
+      if (startDatePicker.value > endDatePicker.value) {
+        endDatePicker.value = startDatePicker.value;
+      }
+      // Check if both input fields have valid values and enable the submit button accordingly
+      if (startDatePicker.value && endDatePicker.value) {
+        submitButton.disabled = false;
+      } else {
+        submitButton.disabled = true;
+      }
+    });
+
+    // Event listener for end date picker
+    endDatePicker.addEventListener("input", function () {
+      // Ensure end date is greater than or equal to start date
+      if (endDatePicker.value < startDatePicker.value) {
+        startDatePicker.value = endDatePicker.value;
+      }
+      // Check if both input fields have valid values and enable the submit button accordingly
+      if (startDatePicker.value && endDatePicker.value) {
+        submitButton.disabled = false;
+      } else {
+        submitButton.disabled = true;
+      }
+    });
+
+    // Event listener for submit button
+    submitButton.addEventListener("click", function () {
+      if (!submitDateButtonClicked) {
+        // Get the selected start date and end date
+        const selectedStartDate = startDatePicker.value;
+        const selectedEndDate = endDatePicker.value;
+  
+        // Create a dictionary with the selected dates
+        const selectedDateRange = {
+          startDate: selectedStartDate,
+          endDate: selectedEndDate,
+        };
+  
+        // You can now use the `selectedDateRange` dictionary as needed
+        console.log("Selected Date Range:", selectedDateRange);
+  
+        // Disable the submit button after it's clicked once
+        submitButton.disabled = true;
+        submitButton.classList.add("disabled"); // Add a CSS class to make it visually appear disabled
+        submitButton.style.pointerEvents = "none"; // Disable pointer events to prevent click highlight
+        submitDateButtonClicked = true; // Set the flag to indicate that it has been clicked
+        // Add the selected date range to the chat log as a user message
+        const userMessage = `{startDate: '${selectedStartDate}', endDate: '${selectedEndDate}'}`;
+        addMessage(userMessage, true);     
+        scrollToBottom(); 
+      }
+    });
   }
 
   // Function to show the greeting message when the chat initializes
@@ -413,6 +529,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // if (userMessage === "Company ID for Payment Status" || userMessage === "Transaction ID for Payment Status") {
       if (userInputType === "clickedCardMessage" && currentCardId >= 5) {
+        addDateRangePicker();
         isProcessingPostRequest = true
         const botReplyData = await generateBotReplyPost(userMessage, userInputType);
         // console.log(botReplyData)
@@ -428,7 +545,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (botReplyData.payment_status_response){
           if (botReplyData.payment_status_response['is_valid_company'] || botReplyData.payment_status_response['is_valid_transaction']) {
             isProcessingPostRequest = false;
-          }
+          }re
         }
         addMessage(botReply, false);
         

@@ -92,7 +92,7 @@ def is_valid_transaction_id(transaction_id):
     return True, None
 
 # Check and update payment status information
-def paymentStatus(user_input, current_card_id):
+def get_payment_status_data_dictionary(user_input, current_card_id):
     # Initialize dictionaries to store payment status and response data
     payment_status_info = {
         "Company ID": None,
@@ -285,7 +285,7 @@ class GetBotReplyAPIView(APIView):
             current_card_id = find_current_card_id(cards_data, user_input)
             request.session['current_card_id'] = current_card_id
             return JsonResponse({
-                'bot_reply': f"Clicked card {current_card_id}.",
+                'bot_reply': f"Clicked on {user_input}.",
                 'user_input': user_input,
                 'user_input_type': user_input_type
             }, json_dumps_params={'indent': 4})
@@ -298,7 +298,7 @@ class GetBotReplyAPIView(APIView):
             if current_card_id == 5 or current_card_id == 6:
                 # print(current_card_id)
                 # Check payment status
-                payment_status_info, payment_status_response = paymentStatus(user_input, current_card_id)
+                payment_status_info, payment_status_response = get_payment_status_data_dictionary(user_input, current_card_id)
                 
                 if payment_status_response.get('is_valid_company') or payment_status_response.get('is_valid_transaction'):
                     payment_status_dataframe = get_payment_status(payment_status_info)
@@ -309,7 +309,7 @@ class GetBotReplyAPIView(APIView):
                         if not payment_status_dataframe.empty:
                             table_html = payment_status_dataframe.to_html(classes=['table', 'table-bordered', 'table-striped', 'table-responsive'], index=False)
                             # Create a bot message
-                            bot_message = "Please allow me a moment; I am in the process of fetching your Payment Status for the past month."
+                            bot_message = "Here is your payment status for the last month:"
                             # The URL path to your CSS file
                             custom_css_path = '/static/chatbot/css/style.css'  
                             # Combine the bot message, custom CSS (loaded from the CSS file), and the table HTML
@@ -332,6 +332,8 @@ class GetBotReplyAPIView(APIView):
                         'bot_reply': payment_status_response['bot_reply'],
                         'payment_status_info': payment_status_info
                     }, json_dumps_params={'indent': 4})
+            elif current_card_id == 7:
+                pass
             else:
                 raise ValueError("Invalid current_card_id")
         except ValueError as e:
