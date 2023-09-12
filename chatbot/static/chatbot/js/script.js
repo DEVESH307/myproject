@@ -427,6 +427,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <label for="month-slider">Select Number of Months:</label>
       <input type="range" id="month-slider" class="month-slider" min="1" max="6" value="1" />
       <span id="selected-months-label">1</span>
+      <br />
       <button id="submit-months" class="btn btn-danger btn-sm my-2">Submit</button>
     `;
 
@@ -737,7 +738,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (userInputType === "clickedCardMessage" && waitForUserInputFlag) {
         // addDateRangePicker();
-        // addMonthSelector() ;
+        addMonthSelector() ;
         isProcessingPostRequest = true
         const botReplyData = await generateBotReplyPost(userMessage, userInputType);
         // console.log(botReplyData)
