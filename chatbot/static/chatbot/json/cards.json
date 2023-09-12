@@ -60,7 +60,7 @@
       "id": 7,
       "user": "Company ID for Payment History",
       "related_options": [8, 9],
-      "chatbot": "Please choose a Date Picker or Time Period for the Payment History.",
+      "chatbot": "Please enter the Company ID for the Payment Status of the past month.",
       "isParent": false,
       "wait_for_user_input": true
     },

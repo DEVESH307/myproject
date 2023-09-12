@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let clickedCardMessage = '';
   let isProcessingPostRequest = false;
   let submitDateButtonClicked = false;
+  let selectedDateRangeAsUserMessage = null;
 
 
 
@@ -53,6 +54,45 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
     return null;
+  }
+
+  // Function to find the wait_for_user_input flag based on user message
+  async function findWaitForUserInputByClickedCardMessage(clickedCardMessage) {
+    if (clickedCardMessage === "") {
+      return false; // Assuming a default value of `false` when no card matches
+    }
+    const cardsData = await loadCardsData();
+    if (cardsData) {
+      const matchingCard = cardsData.Card.find(
+        (card) => card.user.toLowerCase() === clickedCardMessage.toLowerCase()
+      );
+      if (matchingCard) {
+        return matchingCard.wait_for_user_input;
+      } else {
+        throw new Error(`Card not found for user message: "${clickedCardMessage}"`);
+      }
+    }
+    return null;
+  }
+
+  // Function to find a user message by their current card ID
+  async function findUserMessageByCurrentCardId(currentCardId) {
+    if (currentCardId < 0) {
+      return null; // Invalid current card ID
+    }
+
+    // Load the JSON data
+    const cardsData = await loadCardsData();
+
+    if (cardsData) {
+      const matchingUser = cardsData.Card.find(user => user.id === currentCardId);
+      if (matchingUser && matchingUser.user) {
+        return matchingUser.user;
+      } else {
+        throw new Error(`User message not found for current card ID: "${currentCardId}"`);
+      }
+    }
+    return null; // JSON data not available
   }
 
   // Function to create a DOM element with given class names
@@ -262,9 +302,11 @@ document.addEventListener("DOMContentLoaded", function () {
         submitButton.style.pointerEvents = "none"; // Disable pointer events to prevent click highlight
         submitDateButtonClicked = true; // Set the flag to indicate that it has been clicked
         // Add the selected date range to the chat log as a user message
-        const userMessage = `{startDate: '${selectedStartDate}', endDate: '${selectedEndDate}'}`;
-        addMessage(userMessage, true);     
+        selectedDateRangeAsUserMessage = `{'startDate': '${selectedStartDate}', 'endDate': '${selectedEndDate}'}`;   
+        console.log(selectedDateRangeAsUserMessage);
         scrollToBottom(); 
+        // return userMessage;
+        addMessage(selectedDateRangeAsUserMessage, true);
       }
     });
   }
@@ -515,6 +557,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const userInputType = clickedCardMessage !== "" ? 'clickedCardMessage' : 'userMessage';
     // Simulate user input to find the card ID based on the user message
     const currentCardId = await findCardIdByclickedCardMessage(clickedCardMessage);
+    const waitForUserInputFlag = await findWaitForUserInputByClickedCardMessage(clickedCardMessage);
 
     if (userMessage) {
       // addMessage(userMessage, true);
@@ -527,13 +570,12 @@ document.addEventListener("DOMContentLoaded", function () {
       scrollToBottom();
 
 
-      // if (userMessage === "Company ID for Payment Status" || userMessage === "Transaction ID for Payment Status") {
-      if (userInputType === "clickedCardMessage" && currentCardId >= 5) {
-        addDateRangePicker();
+      if (userInputType === "clickedCardMessage" && waitForUserInputFlag) {
+        // addDateRangePicker();
         isProcessingPostRequest = true
         const botReplyData = await generateBotReplyPost(userMessage, userInputType);
         // console.log(botReplyData)
-        const botReply = botReplyData.bot_reply;
+        // const botReply = botReplyData.bot_reply;
         // addMessage(botReply, false);
       }
       
@@ -542,12 +584,38 @@ document.addEventListener("DOMContentLoaded", function () {
         // console.log(isProcessingPostRequest)
         const botReplyData = await generateBotReplyPost(userMessage, userInputType);
         const botReply = botReplyData.bot_reply; 
+        addMessage(botReply, false);
+        // console.log(botReplyData.payment_status_response)
+        // console.log(botReplyData.payment_history_response)
         if (botReplyData.payment_status_response){
           if (botReplyData.payment_status_response['is_valid_company'] || botReplyData.payment_status_response['is_valid_transaction']) {
+            // addMessage(botReply, false);
             isProcessingPostRequest = false;
-          }re
+          }
         }
-        addMessage(botReply, false);
+        if(botReplyData.payment_history_response){
+          const currentCardId = botReplyData.payment_history_response['current_card_id']
+          // if(currentCardId == 8){
+          //   addDateRangePicker();
+          //   userMessage = selectedDateRange;
+          //   addMessage(userMessage, true);
+          // }
+          // if(currentCardId === 7 || currentCardId === 9) {
+            if(botReplyData.payment_history_response['is_valid_company'] || botReplyData.payment_history_response['is_valid_date_range'] || botReplyData.payment_history_response['is_valid_time_period']){
+              // addMessage(botReply, false);
+              const userMessage = await findUserMessageByCurrentCardId(currentCardId);
+              const botReplyData = await generateBotReplyGet(userMessage);
+              let botReply = botReplyData.bot_reply;
+              if(currentCardId == 7){
+                botReply = 'Please choose a Date Picker or Time Period for the Payment History.'
+              }
+              addMessage(botReply, false);
+              showCardOptions(botReplyData);
+              isProcessingPostRequest = false;
+            }
+          // }
+        }
+        // addMessage(botReply, false);
         
       } else {
         const botReplyData = await generateBotReplyGet(userMessage);
@@ -555,7 +623,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
         if (botReplyData.parent_data) {
           addMessage(botReply, false);
-          showCardOptions(botReplyData); // Pass the userMessage as input to showCardOptions
+          showCardOptions(botReplyData);
         } else if (botReplyData.related_cards) {
           showCardOptions(botReplyData);
         } else {
