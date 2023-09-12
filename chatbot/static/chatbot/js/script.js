@@ -311,6 +311,171 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Function to add a message with options for selecting the number of months
+  // function addMonthSelector() {
+  //   const messageElement = createDOMElement("div", ["message", "bot-message"]);
+
+  //   const avatarElement = createDOMElement("div", ["avatar", "bot-avatar"]);
+  //   messageElement.appendChild(avatarElement);
+
+  //   const textElement = createDOMElement("div", ["text-wrapper"]);
+  //   textElement.innerHTML = `
+  //     <p>Please choose the number of months:</p>
+  //     <ul>
+  //       <li><button class="btn btn-link" onclick="selectMonths(1)">1 month</button></li>
+  //       <li><button class="btn btn-link" onclick="selectMonths(3)">3 months</button></li>
+  //       <li><button class="btn btn-link" onclick="selectMonths(6)">6 months</button></li>
+  //     </ul>
+  //   `;
+  //   messageElement.appendChild(textElement);
+
+  //   const timestampElement = createDOMElement("div", ["timestamp", "bot-timestamp"]);
+  //   const timestamp = formatTimestamp(new Date()); // Format the timestamp
+  //   timestampElement.innerText = timestamp; // Set the timestamp text
+  //   messageElement.appendChild(timestampElement); // Append the timestamp element
+
+  //   chatLog.appendChild(messageElement);
+
+  //   // Function to handle user selection of months
+  //   function selectMonths(numMonths) {
+  //     // You can use the `numMonths` value as needed
+  //     console.log("Selected number of months:", numMonths);
+
+  //     // Add the selected number of months to the chat log as a user message
+  //     const selectedMonthsAsUserMessage = `Selected number of months: ${numMonths}`;
+  //     addMessage(selectedMonthsAsUserMessage, true);
+
+  //     // Remove the options message from the chat log
+  //     messageElement.remove();
+  //   }
+  // }
+
+  // // Function to add a month selector with a number
+  // function addMonthSelector() {
+  //   // Create a flag to track if the submit button has been clicked
+  //   let submitButtonClicked = false;
+
+  //   // Create the DOM elements
+  //   const messageElement = createDOMElement("div", ["message", "bot-message"]);
+  //   const avatarElement = createDOMElement("div", ["avatar", "bot-avatar"]);
+  //   const textElement = createDOMElement("div", ["text-wrapper"]);
+
+  //   // Create the month selector input
+  //   textElement.innerHTML = `
+  //     <label for="month-selector">Select Number of Months:</label>
+  //     <input type="number" id="month-selector" class="month-selector" min="1" max="12" placeholder="Enter number of months" />
+  //     <button id="submit-months" class="btn btn-danger btn-sm my-2" disabled>Submit</button>
+  //   `;
+
+  //   // Append elements to the message element
+  //   messageElement.appendChild(avatarElement);
+  //   messageElement.appendChild(textElement);
+
+  //   // Append the message element to the chat log
+  //   chatLog.appendChild(messageElement);
+
+  //   // Get the month selector input and the submit button
+  //   const monthSelector = document.getElementById("month-selector");
+  //   const submitButton = document.getElementById("submit-months");
+
+  //   // Event listener for the month selector input
+  //   monthSelector.addEventListener("input", function () {
+  //     // Check if the entered value is a valid number and enable the submit button accordingly
+  //     if (isValidNumber(monthSelector.value)) {
+  //       submitButton.disabled = false;
+  //     } else {
+  //       submitButton.disabled = true;
+  //     }
+  //   });
+
+  //   // Event listener for the submit button
+  //   submitButton.addEventListener("click", function () {
+  //     if (!submitButtonClicked) {
+  //       // Get the selected number of months
+  //       const selectedMonths = parseInt(monthSelector.value, 10);
+
+  //       // You can now use the `selectedMonths` value as needed
+  //       console.log("Selected Number of Months:", selectedMonths);
+
+  //       // Disable the submit button after it's clicked once
+  //       submitButton.disabled = true;
+  //       submitButton.classList.add("disabled"); // Add a CSS class to make it visually appear disabled
+  //       submitButton.style.pointerEvents = "none"; // Disable pointer events to prevent click highlight
+  //       submitButtonClicked = true; // Set the flag to indicate that it has been clicked
+
+  //       // Add the selected number of months to the chat log as a user message
+  //       const selectedMonthsAsUserMessage = `{'selectedMonths': ${selectedMonths}}`;
+  //       console.log(selectedMonthsAsUserMessage);
+  //       scrollToBottom();
+  //       addMessage(selectedMonthsAsUserMessage, true);
+  //     }
+  //   });
+  // }
+
+  // // Function to add a month selector with a range slider
+  function addMonthSelector() {
+    // Create a flag to track if the submit button has been clicked
+    let submitButtonClicked = false;
+
+    // Create the DOM elements
+    const messageElement = createDOMElement("div", ["message", "bot-message"]);
+    const avatarElement = createDOMElement("div", ["avatar", "bot-avatar"]);
+    const textElement = createDOMElement("div", ["text-wrapper"]);
+
+    // Create the range slider for selecting months
+    textElement.innerHTML = `
+      <label for="month-slider">Select Number of Months:</label>
+      <input type="range" id="month-slider" class="month-slider" min="1" max="6" value="1" />
+      <span id="selected-months-label">1</span>
+      <button id="submit-months" class="btn btn-danger btn-sm my-2">Submit</button>
+    `;
+
+    // Append elements to the message element
+    messageElement.appendChild(avatarElement);
+    messageElement.appendChild(textElement);
+
+    // Append the message element to the chat log
+    chatLog.appendChild(messageElement);
+
+    // Get the range slider, label for selected months, and the submit button
+    const monthSlider = document.getElementById("month-slider");
+    const selectedMonthsLabel = document.getElementById("selected-months-label");
+    const submitButton = document.getElementById("submit-months");
+
+    // Update the label with the initial value of the range slider
+    selectedMonthsLabel.innerText = monthSlider.value;
+
+    // Event listener for the range slider
+    monthSlider.addEventListener("input", function () {
+      // Update the label with the current value of the range slider
+      selectedMonthsLabel.innerText = monthSlider.value;
+    });
+
+    // Event listener for the submit button
+    submitButton.addEventListener("click", function () {
+      if (!submitButtonClicked) {
+        // Get the selected number of months
+        const selectedMonths = parseInt(monthSlider.value, 10);
+
+        // You can now use the `selectedMonths` value as needed
+        console.log("Selected Number of Months:", selectedMonths);
+
+        // Disable the submit button after it's clicked once
+        submitButton.disabled = true;
+        submitButton.classList.add("disabled"); // Add a CSS class to make it visually appear disabled
+        submitButton.style.pointerEvents = "none"; // Disable pointer events to prevent click highlight
+        submitButtonClicked = true; // Set the flag to indicate that it has been clicked
+
+        // Add the selected number of months to the chat log as a user message
+        const selectedMonthsAsUserMessage = `{'selectedMonths': ${selectedMonths}}`;
+        console.log(selectedMonthsAsUserMessage);
+        scrollToBottom();
+        addMessage(selectedMonthsAsUserMessage, true);
+      }
+    });
+  }
+
+
   // Function to show the greeting message when the chat initializes
   function showGreetingMessage() {
     const greetingMessage = "Welcome to WellsCom. How can I assist you today?";
@@ -572,6 +737,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (userInputType === "clickedCardMessage" && waitForUserInputFlag) {
         // addDateRangePicker();
+        // addMonthSelector() ;
         isProcessingPostRequest = true
         const botReplyData = await generateBotReplyPost(userMessage, userInputType);
         // console.log(botReplyData)
